@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { createStore } from "./store.js?v=room-settings-2";
+import { createStore } from "./store.js?v=room-settings-3";
 
 export function createEditorScene(host) {
   const scene = new THREE.Scene();
