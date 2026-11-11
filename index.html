@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101412" />
+    <title>MAGAZIN 3D DESIGN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="./main.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="MAGAZIN 3D bosh sahifa">
+          <span class="brand-mark"><i></i><i></i><i></i></span>
+          <span class="brand-copy"><strong>MAGAZIN <em>3D</em></strong><small>DESIGN STUDIO</small></span>
+        </a>
+        <div class="project-name"><span class="saved-dot"></span><span id="projectTitle">Yangi magazin loyihasi</span><button id="renameProject" class="icon-button tiny" aria-label="Loyiha nomini o'zgartirish" title="Nomini o'zgartirish">✎</button></div>
+        <div class="top-actions">
+          <div class="view-switch" role="group" aria-label="Kamera ko'rinishi">
+            <button class="view-button active" data-view="3d" title="3D ko‘rinish"><span>◇</span> 3D</button>
+            <button class="view-button" data-view="plan" title="Yuqoridan 2D reja"><span>▦</span> 2D reja</button>
+            <button class="view-button" data-view="inside" title="Ichki ko‘rinish"><span>◉</span> Ichki</button>
+          </div>
+          <span class="top-divider"></span>
+          <button id="saveButton" class="top-icon" title="Saqlash"><span>↥</span><small>Saqlash</small></button>
+          <button id="loadButton" class="top-icon" title="JSON loyihani yuklash"><span>↧</span><small>Yuklash</small></button>
+          <button id="screenshotButton" class="top-icon" title="PNG rasmga olish"><span>▣</span><small>Rasm</small></button>
+          <button id="themeButton" class="theme-button" title="Mavzuni almashtirish">☼</button>
+          <button id="resetButton" class="icon-button" title="Boshlang‘ich holatga qaytarish">↺</button>
+        </div>
+        <input id="projectFile" type="file" accept=".json,application/json" hidden />
+      </header>
+
+      <main class="workspace">
+        <aside class="left-panel panel">
+          <div class="panel-heading">
+            <div><span class="eyebrow">LOYIHALASH</span><h1>Jihozlar</h1></div>
+            <button id="collapseCatalog" class="icon-button tiny" title="Katalogni yig‘ish">‹</button>
+          </div>
+          <label class="search-box"><span>⌕</span><input id="catalogSearch" type="search" placeholder="Jihoz qidirish..." /><kbd>⌘ K</kbd></label>
+          <div class="catalog-scroll">
+            <section class="catalog-section">
+              <div class="section-title"><span>ASOSIY JIHOZLAR</span><span>10</span></div>
+              <div id="catalogItems" class="catalog-items"></div>
+            </section>
+            <section class="catalog-section preset-section">
+              <div class="section-title"><span>TAYYOR JOYLASHUV</span><span>03</span></div>
+              <div class="presets">
+                <button class="preset-card selected" data-preset="classic"><span class="preset-art classic-art"><i></i><i></i><i></i><b></b></span><span><strong>Klassik magazin</strong><small>Balansli va qulay</small></span><span class="preset-check">✓</span></button>
+                <button class="preset-card" data-preset="minimal"><span class="preset-art minimal-art"><i></i><i></i><b></b></span><span><strong>Minimalist</strong><small>Ochiq va zamonaviy</small></span><span class="preset-check">✓</span></button>
+                <button class="preset-card" data-preset="mini"><span class="preset-art mini-art"><i></i><i></i><i></i><i></i><b></b></span><span><strong>Mini market</strong><small>Ko‘proq sig‘im</small></span><span class="preset-check">✓</span></button>
+              </div>
+            </section>
+          </div>
+          <div class="left-footer"><span class="help-icon">?</span><span>Jihozni sahnaga qo‘shish uchun ustiga bosing</span></div>
+        </aside>
+
+        <section class="canvas-area" aria-label="3D loyiha sahnasi">
+          <div id="canvasHost" class="canvas-host"></div>
+          <div class="canvas-topline">
+            <div class="scene-breadcrumb"><span class="crumb-home">⌂</span><span>/</span><span>Magazin</span><span>/</span><strong id="activeViewName">3D ko‘rinish</strong></div>
+            <div class="canvas-tools">
+              <button id="wallsButton" class="canvas-tool active" title="Devorlarni ko‘rsatish/yashirish">▥ <span>Devorlar</span></button>
+              <button id="ceilingButton" class="canvas-tool" title="Shiftni ko‘rsatish/yashirish">⌂ <span>Shift</span></button>
+              <span class="tool-divider"></span>
+              <button id="collisionButton" class="canvas-tool" title="Jihozlar to‘qnashuvini tekshirish">⧉ <span>Tekshirish</span></button>
+              <button id="fullscreenButton" class="canvas-tool square" title="To‘liq ekran">⛶</button>
+            </div>
+          </div>
+          <div class="canvas-bottom-left">
+            <div class="mode-switch"><button class="mode-button active" data-mode="translate" title="Ko‘chirish">↔</button><button class="mode-button" data-mode="rotate" title="Aylantirish">⟳</button><button class="mode-button" data-mode="scale" title="O‘lchamni o‘zgartirish">⤢</button></div>
+            <span class="hint-pill">Tanlash uchun jihozni bosing <kbd>⌘</kbd></span>
+          </div>
+          <div class="canvas-bottom-right">
+            <div class="zoom-controls"><button id="zoomOut" aria-label="Kichraytirish">−</button><span id="zoomLabel">100%</span><button id="zoomIn" aria-label="Kattalashtirish">+</button></div>
+            <button id="fitView" class="fit-button" title="Sahnani ekranga moslash">⊡</button>
+          </div>
+          <div id="toast" class="toast" role="status"></div>
+          <div id="loadingState" class="loading-state"><span class="loader"></span><span>3D sahna tayyorlanmoqda</span></div>
+          <div id="collisionBanner" class="collision-banner" hidden></div>
+        </section>
+
+        <aside class="right-panel panel">
+          <div class="panel-heading properties-heading"><div><span class="eyebrow">SOZLAMALAR</span><h2>Xususiyatlar</h2></div><button id="duplicateButton" class="icon-button tiny" title="Nusxa olish" disabled>▣</button></div>
+          <div id="emptyProperties" class="empty-properties"><span class="empty-icon">⌖</span><strong>Jihoz tanlanmagan</strong><p>Sahnadagi jihozni tanlang — uning o‘lchami va joylashuvini shu yerda o‘zgartiring.</p></div>
+          <div id="selectedProperties" class="selected-properties" hidden>
+            <div class="selected-item"><span id="selectedIcon" class="selected-icon">▤</span><div><strong id="objectName">Devor javoni</strong><small id="objectCategory">Savdo jihozi</small></div><button id="deleteButton" class="delete-button" title="Jihozni o‘chirish">⌫</button></div>
+            <div class="property-block"><div class="property-label">O‘LCHAMLAR <span>metr</span></div><div class="dimension-grid">
+              <label><span>Uzunlik</span><div><input id="dimWidth" type="number" min="0.2" max="6.8" step="0.05"><small>m</small></div></label>
+              <label><span>Eni</span><div><input id="dimDepth" type="number" min="0.2" max="3.8" step="0.05"><small>m</small></div></label>
+              <label><span>Balandlik</span><div><input id="dimHeight" type="number" min="0.2" max="2.7" step="0.05"><small>m</small></div></label>
+            </div></div>
+            <div class="property-block"><div class="property-label">JOYLASHUV <span>metr</span></div><div class="coordinate-grid">
+              <label><span>X</span><input id="posX" type="number" step="0.05"></label><label><span>Y</span><input id="posY" type="number" step="0.05"></label><label><span>Z</span><input id="posZ" type="number" step="0.05"></label>
+            </div></div>
+            <div class="property-block rotation-row"><label class="property-label" for="rotation">AYLANISH</label><div class="rotation-control"><input id="rotation" type="range" min="0" max="359" value="0"><span id="rotationValue">0°</span></div></div>
+            <div class="property-block color-row"><label class="property-label" for="objectColor">JIHOZ RANGI</label><div class="color-control"><input id="objectColor" type="color" value="#d9d3c7"><span id="colorValue">#D9D3C7</span><button id="resetColor" class="text-button">Asl holat</button></div></div>
+            <div class="property-block spacing-block"><div class="property-label">ENG YAQIN JIHOZ <span>oraliq</span></div><div id="nearestDistance" class="distance-value">— <small>sm</small></div></div>
+            <div class="selection-actions"><button id="duplicateAction" class="secondary-button">▣ &nbsp; Nusxa olish</button><button id="deleteAction" class="secondary-button danger">⌫ &nbsp; O‘chirish</button></div>
+          </div>
+          <div class="room-settings">
+            <div class="room-heading"><div><span class="eyebrow">XONA</span><h3>O‘lcham va ranglar</h3></div><span class="room-icon">▱</span></div>
+            <div class="room-stats"><div><strong>28</strong><small>m² maydon</small></div><div><strong>78.4</strong><small>m³ hajm</small></div><div><strong>7 × 4</strong><small>metr</small></div></div>
+            <div class="room-color-list"><label><span><i class="swatch wall-swatch"></i>Devor rangi</span><input id="wallColor" type="color" value="#ded0ba"></label><label><span><i class="swatch floor-swatch"></i>Pol rangi</span><input id="floorColor" type="color" value="#e0ded6"></label><label><span><i class="swatch ceiling-swatch"></i>Shift rangi</span><input id="ceilingColor" type="color" value="#e7dcc8"></label></div>
+          </div>
+          <div class="properties-footer"><span class="status-pulse"></span><span>O‘zgarishlar avtomatik saqlanadi</span><span id="lastSaved">Tayyor</span></div>
+        </aside>
+      </main>
+      <footer class="statusbar"><div><span class="status-light"></span><span>3D muharrir tayyor</span><span class="status-separator">•</span><span>1 birlik = 1 metr</span></div><div><span id="furnitureCount">0 jihoz</span><span class="status-separator">•</span><span id="statusDimensions">7.00 m × 4.00 m × 2.80 m</span><span class="status-separator">•</span><span>MAGAZIN 3D DESIGN</span></div></footer>
+    </div>
+  </body>
+</html>
