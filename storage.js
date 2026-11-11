@@ -1,5 +1,5 @@
 import { FURNITURE_TYPES, restoreFurniture, serializeFurniture } from "./furniture.js";
-import { ROOM, ROOM_SETTINGS, normalizeRoomSettings } from "./store.js?v=room-settings-1";
+import { ROOM, ROOM_SETTINGS, normalizeRoomSettings } from "./store.js?v=room-settings-2";
 
 const STORAGE_KEY = "magazin3d-design-project-v1";
 const allowedTypes = new Set(FURNITURE_TYPES.map(item => item.type));

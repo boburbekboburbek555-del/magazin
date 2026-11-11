@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import { createEditorScene } from "./scene.js?v=room-settings-1";
-import { createEditorControls, constrainFurniture } from "./controls.js?v=room-settings-1";
+import { createEditorScene } from "./scene.js?v=room-settings-2";
+import { createEditorControls, constrainFurniture } from "./controls.js?v=room-settings-2";
 import { FURNITURE_TYPES, createFurniture, setFurnitureColor, setFurnitureDimensions, templateFor } from "./furniture.js";
-import { DEFAULT_ROOM_SETTINGS, ROOM, normalizeRoomSettings, rebuildStore, setRoomColor, setWallsVisible } from "./store.js?v=room-settings-1";
-import { createProject, downloadProject, loadSavedProject, parseProjectFile, saveProject } from "./storage.js?v=room-settings-1";
+import { DEFAULT_ROOM_SETTINGS, ROOM, normalizeRoomSettings, rebuildStore, setRoomColor, setWallsVisible } from "./store.js?v=room-settings-2";
+import { createProject, downloadProject, loadSavedProject, parseProjectFile, saveProject } from "./storage.js?v=room-settings-2";
 
 const $ = selector => document.querySelector(selector);
 const canvasHost = $("#canvasHost");
@@ -210,12 +210,13 @@ function syncRoomInputs() {
   $("#frontDoorWidth").max = Math.min(1.8, depth - 0.4).toFixed(2);
   $("#frontDoorOffset").min = (openings.frontDoorWidth / 2 + 0.12).toFixed(2);
   $("#frontDoorOffset").max = (depth - openings.frontDoorWidth / 2 - 0.12).toFixed(2);
-  $("#frontWindowWidth").max = Math.max(0.5, openings.frontDoorOffset - openings.frontDoorWidth / 2 - 0.22).toFixed(2);
-  $("#frontWindowOffset").min = (0.1 + openings.frontWindowWidth / 2).toFixed(2);
-  $("#frontWindowOffset").max = Math.max(
-    0.1 + openings.frontWindowWidth / 2,
-    openings.frontDoorOffset - openings.frontDoorWidth / 2 - 0.12 - openings.frontWindowWidth / 2,
+  $("#frontWindowWidth").max = Math.max(
+    0.5,
+    openings.frontDoorOffset - openings.frontDoorWidth / 2 - 0.22,
+    depth - openings.frontDoorOffset - openings.frontDoorWidth / 2 - 0.22,
   ).toFixed(2);
+  $("#frontWindowOffset").min = (0.1 + openings.frontWindowWidth / 2).toFixed(2);
+  $("#frontWindowOffset").max = (depth - 0.1 - openings.frontWindowWidth / 2).toFixed(2);
   $("#rearDoorWidth").max = (width - 0.3).toFixed(2);
   $("#rearDoorOffset").min = (openings.rearDoorWidth / 2 + 0.15).toFixed(2);
   $("#rearDoorOffset").max = (width - openings.rearDoorWidth / 2 - 0.15).toFixed(2);

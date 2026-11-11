@@ -49,16 +49,30 @@ export function normalizeRoomSettings(settings = {}) {
     frontDoorWidth / 2 + 0.12,
     depth - frontDoorWidth / 2 - 0.12,
   );
-  const availableWindowWidth = frontDoorOffset - frontDoorWidth / 2 - 0.22;
+  const backWindowCapacity = frontDoorOffset - frontDoorWidth / 2 - 0.22;
+  const frontWindowCapacity = depth - frontDoorOffset - frontDoorWidth / 2 - 0.22;
+  const availableWindowWidth = Math.max(backWindowCapacity, frontWindowCapacity);
   const frontWindowWidth = clamp(
     Number(settings.frontWindowWidth ?? Math.min(5.19, availableWindowWidth)),
     0.5,
     Math.max(0.5, availableWindowWidth),
   );
+  const backWindowMin = 0.1 + frontWindowWidth / 2;
+  const backWindowMax = frontDoorOffset - frontDoorWidth / 2 - 0.12 - frontWindowWidth / 2;
+  const frontWindowMin = frontDoorOffset + frontDoorWidth / 2 + 0.12 + frontWindowWidth / 2;
+  const frontWindowMax = depth - 0.1 - frontWindowWidth / 2;
+  const windowFitsBehindDoor = backWindowMax >= backWindowMin;
+  const windowFitsAheadOfDoor = frontWindowMax >= frontWindowMin;
+  const useBackWindow = windowFitsBehindDoor && (
+    !windowFitsAheadOfDoor ||
+    (Number.isFinite(Number(settings.frontWindowOffset)) && Number(settings.frontWindowOffset) <= frontDoorOffset)
+  );
+  const windowMin = useBackWindow ? backWindowMin : frontWindowMin;
+  const windowMax = useBackWindow ? backWindowMax : frontWindowMax;
   const frontWindowOffset = clamp(
-    Number(settings.frontWindowOffset ?? (0.1 + frontWindowWidth / 2 + frontDoorOffset - frontDoorWidth / 2 - 0.12 - frontWindowWidth / 2) / 2),
-    0.1 + frontWindowWidth / 2,
-    Math.max(0.1 + frontWindowWidth / 2, frontDoorOffset - frontDoorWidth / 2 - 0.12 - frontWindowWidth / 2),
+    Number(settings.frontWindowOffset ?? (windowMin + windowMax) / 2),
+    windowMin,
+    windowMax,
   );
   const rearDoorWidth = clamp(Number(settings.rearDoorWidth ?? ROOM_SETTINGS.rearDoorWidth), 0.6, width - 0.3);
   const rearDoorOffset = clamp(Number(settings.rearDoorOffset ?? width / 2), rearDoorWidth / 2 + 0.15, width - rearDoorWidth / 2 - 0.15);
@@ -151,7 +165,8 @@ function addLongFacade(scene, wallColor, sideX) {
   sill(doorWidth + 0.12, doorCenterZ);
   const endWindowStart = doorCenterZ + doorWidth / 2 + 0.12;
   const endWindowLength = d / 2 - 0.1 - endWindowStart;
-  if (endWindowLength > 0.14) {
+  const mainWindowOverlapsEndSection = windowStart < d / 2 - 0.1 && windowEnd > endWindowStart;
+  if (endWindowLength > 0.14 && !mainWindowOverlapsEndSection) {
     pane(endWindowLength, endWindowStart + endWindowLength / 2);
     sill(endWindowLength + 0.04, endWindowStart + endWindowLength / 2);
     frame(0.045, glassHeight + 0.06, 0.045, faceX, glassCenterY, endWindowStart);
