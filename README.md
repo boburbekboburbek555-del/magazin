@@ -1,6 +1,6 @@
 # MAGAZIN 3D DESIGN
 
-Haqiqiy do‘kon xonasini loyihalash uchun brauzerda ishlaydigan 3D muharrir. Yangi loyiha bo‘sh, 7 m uzunlik × 4 m en × 2,8 m balandlikdagi xona bilan ochiladi. Kirish tomonida oynali fasad va o‘ngroqda eshik, orqa devorda esa kichik ichki eshik bor. Pol, ranglar va shift chiroqlari yuborilgan suratlar asosida taxminan chizilgan; suratlarning o‘zidan aniq metrni o‘lchab bo‘lmaydi. Jihozlar katalogdan ixtiyoriy qo‘shiladi yoki tayyor joylashuv tanlanadi.
+Haqiqiy do‘kon xonasini loyihalash uchun brauzerda ishlaydigan 3D muharrir. Yangi loyiha foydalanuvchi yuborgan qo‘l chizmasi asosida taxminiy 4 m × 8 m × 2,8 m xonada ochiladi; bir burchagida 1,4 m × 2 m ichkariga kirgan qadam bor. Uzun devorda kirish eshigi va ikkita katta oyna, qarama-qarshi 4 m devorda 60 sm × 2 m orqa eshik, 6 m devorda esa uchta yuqori kichik oyna ko‘rsatiladi. Chizmada ko‘rsatilgan 4 m × 8 m o‘lcham oldingi xabardagi 7 m × 6 m o‘lcham bilan farq qiladi; loyiha yuborilgan chizmaga qarab qurilgan, o‘lchamlarni o‘ng paneldan tahrirlash mumkin.
 
 ## Ishga tushirish
 
@@ -24,7 +24,7 @@ Three.js importlari CDN’dan olinadi, shuning uchun dastlabki ishga tushirishda
 - `Tekshirish` jihozlar to‘qnashuvini ko‘rsatadi. Xona devori, pol va shift ranglari o‘ng panelda sozlanadi.
 - O‘zgarishlar avtomatik saqlanadi. `Saqlash` JSON faylni eksport qiladi; `Yuklash` JSON loyihani import qiladi. `Rasm` 3D sahnani PNG qilib saqlaydi.
 - `Shift` va `Devorlar` tugmalari mos ravishda shiftni hamda devorlarni yashiradi/ko‘rsatadi.
-- O‘ng paneldagi **Xona shaklini tahrirlash** bo‘limidan xona uzunligi, eni, balandligi, old eshik va oyna o‘lchami/joyi hamda orqa eshikni tahrirlang. Eshik joyi orqa devordan, orqa eshik joyi esa chap chetdan metrda o‘lchanadi. O‘zgarishlar avtomatik saqlanadi va JSON loyihaga ham qo‘shiladi.
+- O‘ng paneldagi **Xona shaklini tahrirlash** bo‘limidan xona uzunligi, eni, balandligi, eshik-oynalar, mayda yuqori oynalar va chizmada ko‘rsatilgan burchak qadamini tahrirlang. O‘zgarishlar avtomatik saqlanadi va JSON loyihaga ham qo‘shiladi.
 - Xona o‘lchamlari uchun ruxsat etilgan oraliq: eni 2–12 m, uzunligi 3–20 m, balandligi 2,2–6 m. Oyna va eshiklar devor chegarasidan tashqariga chiqmasligi uchun qiymatlar moslanadi.
 
 ## Fayllar
@@ -33,7 +33,7 @@ Three.js importlari CDN’dan olinadi, shuning uchun dastlabki ishga tushirishda
 - `style.css` — muharrir ko‘rinishi.
 - `main.js` — UI, joylashuvlar, tahrirlash, to‘qnashuv tekshiruvi va kamera ko‘rinishlari.
 - `scene.js` — Three.js sahnasi va renderer.
-- `store.js` — 4 × 7 × 2,8 m 3D xona (7 × 4 × 2,8 m o‘lcham), oynali kirish fasadi, pol, devor, shift va yoritish.
+- `store.js` — chizmaga mos 4 × 8 × 2,8 m qadamli xona geometriyasi, eshik-oynalar, pol, devor, shift va yoritish.
 - `furniture.js` — jihoz modellari va o‘lchamlari.
 - `controls.js` — kamera, tanlash va TransformControls.
 - `storage.js` — localStorage hamda JSON import/eksport.

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TransformControls } from "three/addons/controls/TransformControls.js";
-import { ROOM } from "./store.js?v=room-settings-3";
+import { ROOM, ROOM_SETTINGS } from "./store.js?v=room-settings-5";
 
 export function createEditorControls({ scene, camera, renderer, onSelect, onChange }) {
   const orbit = new OrbitControls(camera, renderer.domElement);
@@ -88,6 +88,16 @@ export function constrainFurniture(object) {
   if (bounds.max.z > halfDepth) dz = halfDepth - bounds.max.z;
   object.position.x += dx;
   object.position.z += dz;
+  object.updateMatrixWorld(true);
+  const clampedBounds = new THREE.Box3().setFromObject(object);
+  const recessX = -ROOM.width / 2 + ROOM_SETTINGS.recessWidth;
+  const recessZ = ROOM.depth / 2 - ROOM_SETTINGS.recessLength;
+  if (clampedBounds.min.x < recessX && clampedBounds.max.z > recessZ) {
+    const moveRight = recessX - clampedBounds.min.x;
+    const moveBack = clampedBounds.max.z - recessZ;
+    if (moveRight <= moveBack) object.position.x += moveRight;
+    else object.position.z -= moveBack;
+  }
 
   const floor = object.userData.dimensions.height / 2;
   const ceiling = ROOM.height - floor;

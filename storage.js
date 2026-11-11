@@ -1,5 +1,5 @@
 import { FURNITURE_TYPES, restoreFurniture, serializeFurniture } from "./furniture.js";
-import { ROOM, ROOM_SETTINGS, normalizeRoomSettings } from "./store.js?v=room-settings-3";
+import { DEFAULT_ROOM_SETTINGS, ROOM, ROOM_SETTINGS, normalizeRoomSettings } from "./store.js?v=room-settings-5";
 
 const STORAGE_KEY = "magazin3d-design-project-v1";
 const allowedTypes = new Set(FURNITURE_TYPES.map(item => item.type));
@@ -53,9 +53,10 @@ export function validateProject(project) {
     return item;
   });
   const legacyOrientation = project.room?.width === 7 && project.room?.depth === 4;
-  const room = normalizeRoomSettings(legacyOrientation
-    ? { ...project.room, width: 4, depth: 7, length: 7 }
-    : project.room);
+  const legacyDefaultRoom = project.room?.width === 4 && project.room?.depth === 7;
+  const room = normalizeRoomSettings(legacyOrientation || legacyDefaultRoom
+    ? { ...project.room, ...DEFAULT_ROOM_SETTINGS }
+    : project.room || DEFAULT_ROOM_SETTINGS);
   return {
     format: "magazin3d-design",
     version: 1,

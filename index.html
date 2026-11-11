@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./style.css?v=room-settings-2" />
+    <link rel="stylesheet" href="./style.css?v=room-settings-5" />
     <script type="importmap">
       {
         "imports": {
@@ -17,7 +17,7 @@
         }
       }
     </script>
-    <script type="module" src="./main.js?v=room-settings-3"></script>
+    <script type="module" src="./main.js?v=room-settings-5"></script>
   </head>
   <body>
     <div class="app-shell">
@@ -112,7 +112,7 @@
           </div>
           <div class="room-settings">
             <div class="room-heading"><div><span class="eyebrow">XONA</span><h3>O‘lcham va ranglar</h3></div><span class="room-icon">▱</span></div>
-            <div class="room-stats"><div><strong id="roomArea">28</strong><small>m² maydon</small></div><div><strong id="roomVolume">78.4</strong><small>m³ hajm</small></div><div><strong id="roomSize">7 × 4</strong><small>metr</small></div></div>
+            <div class="room-stats"><div><strong id="roomArea">29.2</strong><small>m² maydon</small></div><div><strong id="roomVolume">81.8</strong><small>m³ hajm</small></div><div><strong id="roomSize">8 × 4</strong><small>metr</small></div></div>
             <details class="room-geometry">
               <summary>Xona shaklini tahrirlash</summary>
               <div class="geometry-fields">
@@ -123,16 +123,30 @@
                   <label><span>Balandligi</span><div><input id="roomHeight" type="number" min="2.2" max="6" step="0.1"><small>m</small></div></label>
                 </div>
                 <div class="geometry-group">
-                  <strong>Old eshik va oyna</strong>
+                  <strong>Uzun devordagi kirish va katta oynalar</strong>
                   <label><span>Eshik eni</span><div><input id="frontDoorWidth" type="number" min="0.7" step="0.05"><small>m</small></div></label>
                   <label><span>Eshik joyi · orqadan</span><div><input id="frontDoorOffset" type="number" min="0.5" step="0.05"><small>m</small></div></label>
-                  <label><span>Oyna eni</span><div><input id="frontWindowWidth" type="number" min="0.5" step="0.05"><small>m</small></div></label>
-                  <label><span>Oyna joyi · orqadan</span><div><input id="frontWindowOffset" type="number" min="0.5" step="0.05"><small>m</small></div></label>
+                  <label><span>2 ta oyna jami eni</span><div><input id="frontWindowWidth" type="number" min="0.5" step="0.05"><small>m</small></div></label>
+                  <label><span>Oynalar markazi · orqadan</span><div><input id="frontWindowOffset" type="number" min="0.5" step="0.05"><small>m</small></div></label>
                 </div>
                 <div class="geometry-group">
+                  <strong>4 m orqa devor</strong>
                   <label class="geometry-check"><input id="rearDoorEnabled" type="checkbox"><span>Orqa eshikni ko‘rsatish</span></label>
-                  <label><span>Orqa eshik eni</span><div><input id="rearDoorWidth" type="number" min="0.6" step="0.05"><small>m</small></div></label>
+                  <label><span>Eshik eni</span><div><input id="rearDoorWidth" type="number" min="0.6" step="0.05"><small>m</small></div></label>
+                  <label><span>Eshik bo‘yi</span><div><input id="rearDoorHeight" type="number" min="1.2" step="0.05"><small>m</small></div></label>
                   <label><span>Joylashuvi · chapdan</span><div><input id="rearDoorOffset" type="number" min="0.5" step="0.05"><small>m</small></div></label>
+                </div>
+                <div class="geometry-group">
+                  <strong>6 m devordagi yuqori mayda oynalar</strong>
+                  <label><span>Oynalar soni</span><div><input id="sideWindowCount" type="number" min="0" max="8" step="1"><small>dona</small></div></label>
+                  <label><span>Har birining eni</span><div><input id="sideWindowWidth" type="number" min="0.15" step="0.05"><small>m</small></div></label>
+                  <label><span>Har birining bo‘yi</span><div><input id="sideWindowHeight" type="number" min="0.15" step="0.05"><small>m</small></div></label>
+                  <strong>Yuqori chetidan 20 sm pastda joylashadi.</strong>
+                </div>
+                <div class="geometry-group">
+                  <strong>Chizmada ko‘rsatilgan burchak qadami</strong>
+                  <label><span>Ichkariga kirishi</span><div><input id="recessWidth" type="number" min="0.2" step="0.05"><small>m</small></div></label>
+                  <label><span>Uzunligi</span><div><input id="recessLength" type="number" min="0.2" step="0.05"><small>m</small></div></label>
                 </div>
               </div>
             </details>
@@ -141,7 +155,7 @@
           <div class="properties-footer"><span class="status-pulse"></span><span>O‘zgarishlar avtomatik saqlanadi</span><span id="lastSaved">Tayyor</span></div>
         </aside>
       </main>
-      <footer class="statusbar"><div><span class="status-light"></span><span>3D muharrir tayyor</span><span class="status-separator">•</span><span>1 birlik = 1 metr</span></div><div><span id="furnitureCount">0 jihoz</span><span class="status-separator">•</span><span id="statusDimensions">7.00 m × 4.00 m × 2.80 m</span><span class="status-separator">•</span><span>MAGAZIN 3D DESIGN</span></div></footer>
+      <footer class="statusbar"><div><span class="status-light"></span><span>3D muharrir tayyor</span><span class="status-separator">•</span><span>1 birlik = 1 metr</span></div><div><span id="furnitureCount">0 jihoz</span><span class="status-separator">•</span><span id="statusDimensions">8.00 m × 4.00 m × 2.80 m</span><span class="status-separator">•</span><span>MAGAZIN 3D DESIGN</span></div></footer>
     </div>
   </body>
 </html>

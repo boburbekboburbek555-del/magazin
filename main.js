@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import { createEditorScene } from "./scene.js?v=room-settings-3";
-import { createEditorControls, constrainFurniture } from "./controls.js?v=room-settings-3";
+import { createEditorScene } from "./scene.js?v=room-settings-4";
+import { createEditorControls, constrainFurniture } from "./controls.js?v=room-settings-5";
 import { FURNITURE_TYPES, createFurniture, setFurnitureColor, setFurnitureDimensions, templateFor } from "./furniture.js";
-import { DEFAULT_ROOM_SETTINGS, ROOM, normalizeRoomSettings, rebuildStore, setRoomColor, setWallsVisible } from "./store.js?v=room-settings-3";
-import { createProject, downloadProject, loadSavedProject, parseProjectFile, saveProject } from "./storage.js?v=room-settings-3";
+import { DEFAULT_ROOM_SETTINGS, ROOM, ROOM_SETTINGS, normalizeRoomSettings, rebuildStore, setRoomColor, setWallsVisible } from "./store.js?v=room-settings-5";
+import { createProject, downloadProject, loadSavedProject, parseProjectFile, saveProject } from "./storage.js?v=room-settings-5";
 
 const $ = selector => document.querySelector(selector);
 const canvasHost = $("#canvasHost");
@@ -170,8 +170,9 @@ function nearestGap(object) {
 function syncStatus() {
   $("#furnitureCount").textContent = `${state.objects.length} jihoz`;
   $("#statusDimensions").textContent = `${ROOM.depth.toFixed(2)} m × ${ROOM.width.toFixed(2)} m × ${ROOM.height.toFixed(2)} m`;
-  $("#roomArea").textContent = (ROOM.width * ROOM.depth).toFixed(1).replace(/\.0$/, "");
-  $("#roomVolume").textContent = (ROOM.width * ROOM.depth * ROOM.height).toFixed(1);
+  const floorArea = ROOM.width * ROOM.depth - ROOM_SETTINGS.recessWidth * ROOM_SETTINGS.recessLength;
+  $("#roomArea").textContent = floorArea.toFixed(1).replace(/\.0$/, "");
+  $("#roomVolume").textContent = (floorArea * ROOM.height).toFixed(1);
   $("#roomSize").textContent = `${ROOM.depth.toFixed(1)} × ${ROOM.width.toFixed(1)}`;
 }
 
@@ -205,7 +206,13 @@ function syncRoomInputs() {
   $("#frontWindowOffset").value = openings.frontWindowOffset.toFixed(2);
   $("#rearDoorEnabled").checked = openings.rearDoorEnabled;
   $("#rearDoorWidth").value = openings.rearDoorWidth.toFixed(2);
+  $("#rearDoorHeight").value = openings.rearDoorHeight.toFixed(2);
   $("#rearDoorOffset").value = openings.rearDoorOffset.toFixed(2);
+  $("#recessWidth").value = openings.recessWidth.toFixed(2);
+  $("#recessLength").value = openings.recessLength.toFixed(2);
+  $("#sideWindowCount").value = String(openings.sideWindowCount);
+  $("#sideWindowWidth").value = openings.sideWindowWidth.toFixed(2);
+  $("#sideWindowHeight").value = openings.sideWindowHeight.toFixed(2);
 
   $("#frontDoorWidth").max = Math.min(1.8, depth - 0.4).toFixed(2);
   $("#frontDoorOffset").min = (openings.frontDoorWidth / 2 + 0.12).toFixed(2);
@@ -220,7 +227,10 @@ function syncRoomInputs() {
   $("#rearDoorWidth").max = (width - 0.3).toFixed(2);
   $("#rearDoorOffset").min = (openings.rearDoorWidth / 2 + 0.15).toFixed(2);
   $("#rearDoorOffset").max = (width - openings.rearDoorWidth / 2 - 0.15).toFixed(2);
-  for (const id of ["rearDoorWidth", "rearDoorOffset"]) $(`#${id}`).disabled = !openings.rearDoorEnabled;
+  $("#rearDoorHeight").max = (height - 0.2).toFixed(2);
+  $("#recessWidth").max = (width - 0.3).toFixed(2);
+  $("#recessLength").max = (depth - 1).toFixed(2);
+  for (const id of ["rearDoorWidth", "rearDoorHeight", "rearDoorOffset"]) $(`#${id}`).disabled = !openings.rearDoorEnabled;
   syncStatus();
 }
 
@@ -399,6 +409,9 @@ function clearCollisionReport() {
 function setView(view) {
   if (!editor || !controls) return;
   state.view = view;
+  const showCeiling = view !== "plan" && state.ceilingVisible;
+  editor.room.ceiling.visible = showCeiling;
+  editor.room.ceilingDetails.visible = showCeiling;
   document.querySelectorAll(".view-button").forEach(button => button.classList.toggle("active", button.dataset.view === view));
   $("#activeViewName").textContent = view === "3d" ? "3D ko‘rinish" : view === "plan" ? "2D reja" : "Ichki ko‘rinish";
   const target = controls.orbit.target;
@@ -568,7 +581,8 @@ for (const part of ["wall", "floor", "ceiling"]) {
 }
 const roomInputIds = [
   "roomLength", "roomWidth", "roomHeight", "frontDoorWidth", "frontDoorOffset",
-  "frontWindowWidth", "frontWindowOffset", "rearDoorWidth", "rearDoorOffset",
+  "frontWindowWidth", "frontWindowOffset", "rearDoorWidth", "rearDoorHeight", "rearDoorOffset",
+  "recessWidth", "recessLength", "sideWindowCount", "sideWindowWidth", "sideWindowHeight",
 ];
 const updateRoomFromInputs = () => {
   try {
@@ -583,7 +597,13 @@ const updateRoomFromInputs = () => {
       frontWindowOffset: Number($("#frontWindowOffset").value),
       rearDoorEnabled: $("#rearDoorEnabled").checked,
       rearDoorWidth: Number($("#rearDoorWidth").value),
+      rearDoorHeight: Number($("#rearDoorHeight").value),
       rearDoorOffset: Number($("#rearDoorOffset").value),
+      recessWidth: Number($("#recessWidth").value),
+      recessLength: Number($("#recessLength").value),
+      sideWindowCount: Number($("#sideWindowCount").value),
+      sideWindowWidth: Number($("#sideWindowWidth").value),
+      sideWindowHeight: Number($("#sideWindowHeight").value),
     });
   } catch (error) {
     console.error("Xona geometriyasi o‘zgartirilmadi:", error);
