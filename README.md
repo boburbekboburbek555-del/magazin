@@ -1,6 +1,6 @@
 # MAGAZIN 3D DESIGN
 
-Haqiqiy do‘kon xonasini loyihalash uchun brauzerda ishlaydigan 3D muharrir. Yangi loyiha foydalanuvchi yuborgan qo‘l chizmasi asosida taxminiy 4 m × 8 m × 2,8 m xonada ochiladi; bir burchagida 1,4 m × 2 m ichkariga kirgan qadam bor. Orqa eshik chizmada qora bilan ko‘rsatilgan qadam devoriga joylashtiriladi; boshqaruv panelidan uni 4 m orqa devorga ko‘chirish ham mumkin. Uzun devorda kirish eshigi va ikkita katta oyna, 6 m devorda esa yuqori kichik oynalar ko‘rsatiladi. Chizmada ko‘rsatilgan 4 m × 8 m o‘lcham oldingi xabardagi 7 m × 6 m o‘lcham bilan farq qiladi; loyiha chizmaga qarab qurilgan, o‘lchamlarni o‘ng paneldan tahrirlash mumkin.
+Haqiqiy do‘kon xonasini loyihalash uchun brauzerda ishlaydigan 3D muharrir. Yangi loyiha foydalanuvchi yuborgan qo‘l chizmasi asosida taxminiy 4 m × 8 m × 2,8 m xonada ochiladi; bir burchagida 1,4 m × 2 m ichkariga kirgan qadam bor. Orqa eshik to‘g‘ridan-to‘g‘ri xonaning qarshi qisqa devorida joylashadi. Uzun devorda kirish eshigi va ikkita katta oyna, 6 m devorda esa yuqori kichik oynalar ko‘rsatiladi. Chizmada ko‘rsatilgan 4 m × 8 m o‘lcham oldingi xabardagi 7 m × 6 m o‘lcham bilan farq qiladi; loyiha chizmaga qarab qurilgan, o‘lchamlarni o‘ng paneldan tahrirlash mumkin.
 
 ## Ishga tushirish
 
@@ -25,7 +25,7 @@ Three.js importlari CDN’dan olinadi, shuning uchun dastlabki ishga tushirishda
 - O‘zgarishlar avtomatik saqlanadi. `Saqlash` JSON faylni eksport qiladi; `Yuklash` JSON loyihani import qiladi. `Rasm` 3D sahnani PNG qilib saqlaydi.
 - `Shift` va `Devorlar` tugmalari mos ravishda shiftni hamda devorlarni yashiradi/ko‘rsatadi.
 - O‘ng paneldagi **Xona shaklini tahrirlash** bo‘limidan xona uzunligi, eni, balandligi, eshik-oynalar, mayda yuqori oynalar va chizmada ko‘rsatilgan burchak qadamini tahrirlang. O‘zgarishlar avtomatik saqlanadi va JSON loyihaga ham qo‘shiladi.
-- Orqa eshik odatda chizmada qora bilan belgilangan burchak devorida bo‘ladi. **Orqa eshik joylashuvi → Devor** ro‘yxatidan uni 4 m orqa devorga ko‘chirish mumkin; eshikning eni, bo‘yi va shu devordagi o‘rni ham sozlanadi.
+- Orqa eshik odatda xonaning qisqa devorida, qarshi tomonga to‘g‘ri keladigan joyda bo‘ladi. **Orqa eshik joylashuvi → Devor** ro‘yxatidan uni qarshi 4 m devor yoki burchak qaytma devoriga ko‘chirish hamda eni, bo‘yi va o‘rnini sozlash mumkin.
 - Xona o‘lchamlari uchun ruxsat etilgan oraliq: eni 2–12 m, uzunligi 3–20 m, balandligi 2,2–6 m. Oyna va eshiklar devor chegarasidan tashqariga chiqmasligi uchun qiymatlar moslanadi.
 
 ## Fayllar

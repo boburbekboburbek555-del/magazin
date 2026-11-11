@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import { createEditorScene } from "./scene.js?v=room-settings-6";
-import { createEditorControls, constrainFurniture } from "./controls.js?v=room-settings-6";
+import { createEditorScene } from "./scene.js?v=room-settings-7";
+import { createEditorControls, constrainFurniture } from "./controls.js?v=room-settings-7";
 import { FURNITURE_TYPES, createFurniture, setFurnitureColor, setFurnitureDimensions, templateFor } from "./furniture.js";
-import { DEFAULT_ROOM_SETTINGS, ROOM, ROOM_SETTINGS, normalizeRoomSettings, rebuildStore, setRoomColor, setWallsVisible } from "./store.js?v=room-settings-6";
-import { createProject, downloadProject, loadSavedProject, parseProjectFile, saveProject } from "./storage.js?v=room-settings-6";
+import { DEFAULT_ROOM_SETTINGS, ROOM, ROOM_SETTINGS, normalizeRoomSettings, rebuildStore, setRoomColor, setWallsVisible } from "./store.js?v=room-settings-7";
+import { createProject, downloadProject, loadSavedProject, parseProjectFile, saveProject } from "./storage.js?v=room-settings-7";
 
 const $ = selector => document.querySelector(selector);
 const canvasHost = $("#canvasHost");
@@ -225,11 +225,15 @@ function syncRoomInputs() {
   ).toFixed(2);
   $("#frontWindowOffset").min = (0.1 + openings.frontWindowWidth / 2).toFixed(2);
   $("#frontWindowOffset").max = (depth - 0.1 - openings.frontWindowWidth / 2).toFixed(2);
-  const rearDoorSpan = openings.rearDoorWall === "recess" ? openings.recessLength : width;
+  const rearDoorSpan = openings.rearDoorWall === "recess"
+    ? openings.recessLength
+    : openings.rearDoorWall === "front" ? width - openings.recessWidth : width;
   $("#rearDoorWidth").max = (rearDoorSpan - 0.3).toFixed(2);
   $("#rearDoorOffset").min = (openings.rearDoorWidth / 2 + 0.15).toFixed(2);
   $("#rearDoorOffset").max = (rearDoorSpan - openings.rearDoorWidth / 2 - 0.15).toFixed(2);
-  $("#rearDoorOffsetLabel").textContent = openings.rearDoorWall === "recess" ? "Joylashuvi · burchakdan" : "Joylashuvi · chapdan";
+  $("#rearDoorOffsetLabel").textContent = openings.rearDoorWall === "recess"
+    ? "Joylashuvi · burchakdan"
+    : openings.rearDoorWall === "front" ? "Joylashuvi · burchakdan" : "Joylashuvi · chapdan";
   $("#rearDoorHeight").max = (height - 0.2).toFixed(2);
   $("#recessWidth").max = (width - 0.3).toFixed(2);
   $("#recessLength").max = (depth - 1).toFixed(2);
