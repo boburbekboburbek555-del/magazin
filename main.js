@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import { createEditorScene } from "./scene.js";
-import { createEditorControls, constrainFurniture } from "./controls.js";
+import { createEditorScene } from "./scene.js?v=room-settings-1";
+import { createEditorControls, constrainFurniture } from "./controls.js?v=room-settings-1";
 import { FURNITURE_TYPES, createFurniture, setFurnitureColor, setFurnitureDimensions, templateFor } from "./furniture.js";
-import { DEFAULT_ROOM_SETTINGS, ROOM, normalizeRoomSettings, rebuildStore, setRoomColor, setWallsVisible } from "./store.js";
-import { createProject, downloadProject, loadSavedProject, parseProjectFile, saveProject } from "./storage.js";
+import { DEFAULT_ROOM_SETTINGS, ROOM, normalizeRoomSettings, rebuildStore, setRoomColor, setWallsVisible } from "./store.js?v=room-settings-1";
+import { createProject, downloadProject, loadSavedProject, parseProjectFile, saveProject } from "./storage.js?v=room-settings-1";
 
 const $ = selector => document.querySelector(selector);
 const canvasHost = $("#canvasHost");

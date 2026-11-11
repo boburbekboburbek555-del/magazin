@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TransformControls } from "three/addons/controls/TransformControls.js";
-import { ROOM } from "./store.js";
+import { ROOM } from "./store.js?v=room-settings-1";
 
 export function createEditorControls({ scene, camera, renderer, onSelect, onChange }) {
   const orbit = new OrbitControls(camera, renderer.domElement);
