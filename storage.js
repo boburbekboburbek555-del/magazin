@@ -1,5 +1,5 @@
 import { FURNITURE_TYPES, restoreFurniture, serializeFurniture } from "./furniture.js";
-import { DEFAULT_ROOM_SETTINGS, ROOM, ROOM_SETTINGS, normalizeRoomSettings } from "./store.js?v=room-settings-7";
+import { DEFAULT_ROOM_SETTINGS, ROOM, ROOM_SETTINGS, normalizeRoomSettings } from "./store.js?v=room-settings-8";
 
 const STORAGE_KEY = "magazin3d-design-project-v1";
 const allowedTypes = new Set(FURNITURE_TYPES.map(item => item.type));
@@ -9,6 +9,7 @@ export function createProject({ objects, colors, title, preset, room }) {
   return {
     format: "magazin3d-design",
     version: 1,
+    roomSettingsVersion: 2,
     title,
     preset,
     room: room ? normalizeRoomSettings(room) : { ...ROOM, ...ROOM_SETTINGS },
@@ -54,12 +55,17 @@ export function validateProject(project) {
   });
   const legacyOrientation = project.room?.width === 7 && project.room?.depth === 4;
   const legacyDefaultRoom = project.room?.width === 4 && project.room?.depth === 7;
-  const room = normalizeRoomSettings(legacyOrientation || legacyDefaultRoom
+  const legacyRearDoorDefault = project.roomSettingsVersion !== 2 && project.room?.rearDoorWall === "front";
+  const roomSettings = legacyOrientation || legacyDefaultRoom
     ? { ...project.room, ...DEFAULT_ROOM_SETTINGS }
-    : project.room || DEFAULT_ROOM_SETTINGS);
+    : legacyRearDoorDefault
+      ? { ...project.room, rearDoorWall: DEFAULT_ROOM_SETTINGS.rearDoorWall, rearDoorOffset: DEFAULT_ROOM_SETTINGS.rearDoorOffset }
+      : project.room || DEFAULT_ROOM_SETTINGS;
+  const room = normalizeRoomSettings(roomSettings);
   return {
     format: "magazin3d-design",
     version: 1,
+    roomSettingsVersion: 2,
     title: typeof project.title === "string" ? project.title.slice(0, 80) : "Yangi magazin loyihasi",
     preset: ["empty", "classic", "minimal", "mini"].includes(project.preset) ? project.preset : "empty",
     colors: {
