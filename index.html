@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./style.css?v=room-settings-5" />
+    <link rel="stylesheet" href="./style.css?v=room-settings-6" />
     <script type="importmap">
       {
         "imports": {
@@ -17,7 +17,7 @@
         }
       }
     </script>
-    <script type="module" src="./main.js?v=room-settings-5"></script>
+    <script type="module" src="./main.js?v=room-settings-6"></script>
   </head>
   <body>
     <div class="app-shell">
@@ -130,11 +130,12 @@
                   <label><span>Oynalar markazi · orqadan</span><div><input id="frontWindowOffset" type="number" min="0.5" step="0.05"><small>m</small></div></label>
                 </div>
                 <div class="geometry-group">
-                  <strong>4 m orqa devor</strong>
+                  <strong>Orqa eshik joylashuvi</strong>
                   <label class="geometry-check"><input id="rearDoorEnabled" type="checkbox"><span>Orqa eshikni ko‘rsatish</span></label>
+                  <label><span>Devor</span><select id="rearDoorWall"><option value="recess">Aylana bilan ko‘rsatilgan joy</option><option value="back">4 m orqa devor</option></select></label>
                   <label><span>Eshik eni</span><div><input id="rearDoorWidth" type="number" min="0.6" step="0.05"><small>m</small></div></label>
                   <label><span>Eshik bo‘yi</span><div><input id="rearDoorHeight" type="number" min="1.2" step="0.05"><small>m</small></div></label>
-                  <label><span>Joylashuvi · chapdan</span><div><input id="rearDoorOffset" type="number" min="0.5" step="0.05"><small>m</small></div></label>
+                  <label><span id="rearDoorOffsetLabel">Joylashuvi · burchakdan</span><div><input id="rearDoorOffset" type="number" min="0.5" step="0.05"><small>m</small></div></label>
                 </div>
                 <div class="geometry-group">
                   <strong>6 m devordagi yuqori mayda oynalar</strong>

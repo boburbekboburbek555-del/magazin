@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import { createEditorScene } from "./scene.js?v=room-settings-4";
-import { createEditorControls, constrainFurniture } from "./controls.js?v=room-settings-5";
+import { createEditorScene } from "./scene.js?v=room-settings-6";
+import { createEditorControls, constrainFurniture } from "./controls.js?v=room-settings-6";
 import { FURNITURE_TYPES, createFurniture, setFurnitureColor, setFurnitureDimensions, templateFor } from "./furniture.js";
-import { DEFAULT_ROOM_SETTINGS, ROOM, ROOM_SETTINGS, normalizeRoomSettings, rebuildStore, setRoomColor, setWallsVisible } from "./store.js?v=room-settings-5";
-import { createProject, downloadProject, loadSavedProject, parseProjectFile, saveProject } from "./storage.js?v=room-settings-5";
+import { DEFAULT_ROOM_SETTINGS, ROOM, ROOM_SETTINGS, normalizeRoomSettings, rebuildStore, setRoomColor, setWallsVisible } from "./store.js?v=room-settings-6";
+import { createProject, downloadProject, loadSavedProject, parseProjectFile, saveProject } from "./storage.js?v=room-settings-6";
 
 const $ = selector => document.querySelector(selector);
 const canvasHost = $("#canvasHost");
@@ -205,6 +205,7 @@ function syncRoomInputs() {
   $("#frontWindowWidth").value = openings.frontWindowWidth.toFixed(2);
   $("#frontWindowOffset").value = openings.frontWindowOffset.toFixed(2);
   $("#rearDoorEnabled").checked = openings.rearDoorEnabled;
+  $("#rearDoorWall").value = openings.rearDoorWall;
   $("#rearDoorWidth").value = openings.rearDoorWidth.toFixed(2);
   $("#rearDoorHeight").value = openings.rearDoorHeight.toFixed(2);
   $("#rearDoorOffset").value = openings.rearDoorOffset.toFixed(2);
@@ -224,9 +225,11 @@ function syncRoomInputs() {
   ).toFixed(2);
   $("#frontWindowOffset").min = (0.1 + openings.frontWindowWidth / 2).toFixed(2);
   $("#frontWindowOffset").max = (depth - 0.1 - openings.frontWindowWidth / 2).toFixed(2);
-  $("#rearDoorWidth").max = (width - 0.3).toFixed(2);
+  const rearDoorSpan = openings.rearDoorWall === "recess" ? openings.recessLength : width;
+  $("#rearDoorWidth").max = (rearDoorSpan - 0.3).toFixed(2);
   $("#rearDoorOffset").min = (openings.rearDoorWidth / 2 + 0.15).toFixed(2);
-  $("#rearDoorOffset").max = (width - openings.rearDoorWidth / 2 - 0.15).toFixed(2);
+  $("#rearDoorOffset").max = (rearDoorSpan - openings.rearDoorWidth / 2 - 0.15).toFixed(2);
+  $("#rearDoorOffsetLabel").textContent = openings.rearDoorWall === "recess" ? "Joylashuvi · burchakdan" : "Joylashuvi · chapdan";
   $("#rearDoorHeight").max = (height - 0.2).toFixed(2);
   $("#recessWidth").max = (width - 0.3).toFixed(2);
   $("#recessLength").max = (depth - 1).toFixed(2);
@@ -580,7 +583,7 @@ for (const part of ["wall", "floor", "ceiling"]) {
   });
 }
 const roomInputIds = [
-  "roomLength", "roomWidth", "roomHeight", "frontDoorWidth", "frontDoorOffset",
+  "roomLength", "roomWidth", "roomHeight", "frontDoorWidth", "frontDoorOffset", "rearDoorWall",
   "frontWindowWidth", "frontWindowOffset", "rearDoorWidth", "rearDoorHeight", "rearDoorOffset",
   "recessWidth", "recessLength", "sideWindowCount", "sideWindowWidth", "sideWindowHeight",
 ];
@@ -596,6 +599,7 @@ const updateRoomFromInputs = () => {
       frontWindowWidth: Number($("#frontWindowWidth").value),
       frontWindowOffset: Number($("#frontWindowOffset").value),
       rearDoorEnabled: $("#rearDoorEnabled").checked,
+      rearDoorWall: $("#rearDoorWall").value,
       rearDoorWidth: Number($("#rearDoorWidth").value),
       rearDoorHeight: Number($("#rearDoorHeight").value),
       rearDoorOffset: Number($("#rearDoorOffset").value),

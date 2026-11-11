@@ -11,6 +11,7 @@ export const DEFAULT_ROOM_SETTINGS = Object.freeze({
   frontWindowWidth: 5.2,
   frontWindowOffset: 3.48,
   rearDoorEnabled: true,
+  rearDoorWall: "back",
   rearDoorWidth: 0.6,
   rearDoorHeight: 2,
   rearDoorOffset: 2.7,
@@ -79,11 +80,26 @@ export function normalizeRoomSettings(settings = {}) {
     windowMin,
     windowMax,
   );
-  const rearDoorWidth = clamp(Number(settings.rearDoorWidth ?? ROOM_SETTINGS.rearDoorWidth), 0.6, width - 0.3);
-  const rearDoorHeight = clamp(Number(settings.rearDoorHeight ?? ROOM_SETTINGS.rearDoorHeight), 1.2, height - 0.2);
-  const rearDoorOffset = clamp(Number(settings.rearDoorOffset ?? ROOM_SETTINGS.rearDoorOffset), rearDoorWidth / 2 + 0.15, width - rearDoorWidth / 2 - 0.15);
+  const rearDoorWall = ["back", "recess"].includes(settings.rearDoorWall)
+    ? settings.rearDoorWall
+    : DEFAULT_ROOM_SETTINGS.rearDoorWall;
   const recessWidth = clamp(Number(settings.recessWidth ?? ROOM_SETTINGS.recessWidth), 0.2, width - 0.3);
-  const recessLength = clamp(Number(settings.recessLength ?? ROOM_SETTINGS.recessLength), 0.2, depth - 1);
+  const recessLength = clamp(
+    Number(settings.recessLength ?? ROOM_SETTINGS.recessLength),
+    rearDoorWall === "recess" && settings.rearDoorEnabled !== false ? 0.9 : 0.2,
+    depth - 1,
+  );
+  const rearDoorSpan = rearDoorWall === "recess" ? recessLength : width;
+  const rearDoorWidth = clamp(Number(settings.rearDoorWidth ?? ROOM_SETTINGS.rearDoorWidth), 0.6, rearDoorSpan - 0.3);
+  const rearDoorHeight = clamp(Number(settings.rearDoorHeight ?? ROOM_SETTINGS.rearDoorHeight), 1.2, height - 0.2);
+  const rearDoorOffsetDefault = settings.rearDoorWall === undefined
+    ? DEFAULT_ROOM_SETTINGS.rearDoorOffset
+    : ROOM_SETTINGS.rearDoorOffset;
+  const rearDoorOffset = clamp(
+    Number(settings.rearDoorOffset ?? rearDoorOffsetDefault),
+    rearDoorWidth / 2 + 0.15,
+    rearDoorSpan - rearDoorWidth / 2 - 0.15,
+  );
   const sideWindowCount = Math.round(clamp(Number(settings.sideWindowCount ?? ROOM_SETTINGS.sideWindowCount), 0, 8));
   const sideWindowWidth = clamp(Number(settings.sideWindowWidth ?? ROOM_SETTINGS.sideWindowWidth), 0.15, Math.max(0.15, (depth - recessLength - 0.3) / Math.max(sideWindowCount, 1) - 0.1));
   const sideWindowHeight = clamp(Number(settings.sideWindowHeight ?? ROOM_SETTINGS.sideWindowHeight), 0.15, Math.max(0.15, height - 0.8));
@@ -99,6 +115,7 @@ export function normalizeRoomSettings(settings = {}) {
     frontWindowWidth,
     frontWindowOffset,
     rearDoorEnabled: settings.rearDoorEnabled !== false,
+    rearDoorWall,
     rearDoorWidth,
     rearDoorHeight,
     rearDoorOffset,
@@ -126,6 +143,7 @@ export function setRoomSettings(settings) {
     frontWindowWidth: normalized.frontWindowWidth,
     frontWindowOffset: normalized.frontWindowOffset,
     rearDoorEnabled: normalized.rearDoorEnabled,
+    rearDoorWall: normalized.rearDoorWall,
     rearDoorWidth: normalized.rearDoorWidth,
     rearDoorHeight: normalized.rearDoorHeight,
     rearDoorOffset: normalized.rearDoorOffset,
@@ -274,6 +292,43 @@ function addRearDoor(scene, wallColor, backZ) {
   }
   const lintel = new THREE.Mesh(new THREE.BoxGeometry(doorWidth + 0.055, 0.055, 0.055), frameMaterial);
   lintel.position.set(doorCenterX, doorHeight, backZ + 0.035);
+  rearDoorGroup.add(lintel);
+  scene.add(rearDoorGroup);
+  wallMeshes.push(rearDoorGroup);
+}
+
+function addRearDoorAtRecess(scene, wallColor, recessX, recessZ, frontZ) {
+  const { height: h, wallThickness: t } = ROOM;
+  const { rearDoorWidth: doorWidth, rearDoorHeight, rearDoorOffset } = ROOM_SETTINGS;
+  const doorHeight = Math.min(rearDoorHeight, h - 0.2);
+  const doorCenterZ = recessZ + rearDoorOffset;
+  const doorStart = doorCenterZ - doorWidth / 2;
+  const doorEnd = doorCenterZ + doorWidth / 2;
+  const leftWidth = doorStart - recessZ;
+  const rightWidth = frontZ - doorEnd;
+  wall(scene, t, h, leftWidth, recessX, h / 2, recessZ + leftWidth / 2, wallColor);
+  wall(scene, t, h, rightWidth, recessX, h / 2, doorEnd + rightWidth / 2, wallColor);
+  wall(scene, t, h - doorHeight, doorWidth, recessX, doorHeight + (h - doorHeight) / 2, doorCenterZ, wallColor);
+
+  const faceX = recessX + t / 2 + 0.025;
+  const rearDoorGroup = new THREE.Group();
+  rearDoorGroup.userData.roomPart = "wall";
+  const darkOpening = new THREE.Mesh(
+    new THREE.PlaneGeometry(doorWidth, doorHeight),
+    new THREE.MeshStandardMaterial({ color: "#38332d", roughness: 0.92, side: THREE.DoubleSide })
+  );
+  darkOpening.rotation.y = Math.PI / 2;
+  darkOpening.position.set(faceX, doorHeight / 2, doorCenterZ);
+  rearDoorGroup.add(darkOpening);
+
+  const frameMaterial = new THREE.MeshStandardMaterial({ color: "#716755", roughness: 0.55 });
+  for (const z of [doorStart, doorEnd]) {
+    const jamb = new THREE.Mesh(new THREE.BoxGeometry(0.055, doorHeight, 0.055), frameMaterial);
+    jamb.position.set(faceX, doorHeight / 2, z);
+    rearDoorGroup.add(jamb);
+  }
+  const lintel = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.055, doorWidth + 0.055), frameMaterial);
+  lintel.position.set(faceX, doorHeight, doorCenterZ);
   rearDoorGroup.add(lintel);
   scene.add(rearDoorGroup);
   wallMeshes.push(rearDoorGroup);
@@ -469,14 +524,18 @@ export function createStore(scene, colors = {}, settings = {}) {
   root.add(ceiling);
   const ceilingDetails = addCeilingDetails(root);
 
-  if (ROOM_SETTINGS.rearDoorEnabled) addRearDoor(root, wallColor, backZ);
+  if (ROOM_SETTINGS.rearDoorEnabled && ROOM_SETTINGS.rearDoorWall === "back") addRearDoor(root, wallColor, backZ);
   else wall(root, w + t, h, t, 0, h / 2, backZ, wallColor);
   const recessX = -w / 2 + ROOM_SETTINGS.recessWidth;
   const recessZ = frontZ - ROOM_SETTINGS.recessLength;
   wall(root, w - ROOM_SETTINGS.recessWidth + t, h, t, (recessX + w / 2) / 2, h / 2, frontZ, wallColor);
   wall(root, t, h, d - ROOM_SETTINGS.recessLength + t, -w / 2, h / 2, (backZ + recessZ) / 2, wallColor);
   wall(root, ROOM_SETTINGS.recessWidth, h, t, (-w / 2 + recessX) / 2, h / 2, recessZ, wallColor);
-  wall(root, t, h, ROOM_SETTINGS.recessLength + t, recessX, h / 2, (recessZ + frontZ) / 2, wallColor);
+  if (ROOM_SETTINGS.rearDoorEnabled && ROOM_SETTINGS.rearDoorWall === "recess") {
+    addRearDoorAtRecess(root, wallColor, recessX, recessZ, frontZ);
+  } else {
+    wall(root, t, h, ROOM_SETTINGS.recessLength + t, recessX, h / 2, (recessZ + frontZ) / 2, wallColor);
+  }
   addUpperSideWindows(root, wallColor);
   const doorGroup = addLongFacade(root, wallColor, w / 2);
 
