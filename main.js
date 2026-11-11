@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { createEditorScene } from "./scene.js";
 import { createEditorControls, constrainFurniture } from "./controls.js";
 import { FURNITURE_TYPES, createFurniture, setFurnitureColor, setFurnitureDimensions, templateFor } from "./furniture.js";
-import { ROOM, setRoomColor, setWallsVisible } from "./store.js";
+import { DEFAULT_ROOM_SETTINGS, ROOM, normalizeRoomSettings, rebuildStore, setRoomColor, setWallsVisible } from "./store.js";
 import { createProject, downloadProject, loadSavedProject, parseProjectFile, saveProject } from "./storage.js";
 
 const $ = selector => document.querySelector(selector);
@@ -15,6 +15,7 @@ const state = {
   title: "Yangi magazin loyihasi",
   preset: "empty",
   colors: { wall: "#ded0ba", floor: "#e0ded6", ceiling: "#e7dcc8" },
+  room: normalizeRoomSettings(DEFAULT_ROOM_SETTINGS),
   wallsVisible: true,
   ceilingVisible: false,
   view: "3d",
@@ -168,6 +169,10 @@ function nearestGap(object) {
 
 function syncStatus() {
   $("#furnitureCount").textContent = `${state.objects.length} jihoz`;
+  $("#statusDimensions").textContent = `${ROOM.depth.toFixed(2)} m × ${ROOM.width.toFixed(2)} m × ${ROOM.height.toFixed(2)} m`;
+  $("#roomArea").textContent = (ROOM.width * ROOM.depth).toFixed(1).replace(/\.0$/, "");
+  $("#roomVolume").textContent = (ROOM.width * ROOM.depth * ROOM.height).toFixed(1);
+  $("#roomSize").textContent = `${ROOM.depth.toFixed(1)} × ${ROOM.width.toFixed(1)}`;
 }
 
 function scheduleSave() {
@@ -186,7 +191,49 @@ function scheduleSave() {
 }
 
 function makeProject() {
-  return createProject({ objects: state.objects, colors: state.colors, title: state.title, preset: state.preset });
+  return createProject({ objects: state.objects, colors: state.colors, title: state.title, preset: state.preset, room: state.room });
+}
+
+function syncRoomInputs() {
+  const { width, depth, height, ...openings } = state.room;
+  $("#roomLength").value = depth.toFixed(2);
+  $("#roomWidth").value = width.toFixed(2);
+  $("#roomHeight").value = height.toFixed(2);
+  $("#frontDoorWidth").value = openings.frontDoorWidth.toFixed(2);
+  $("#frontDoorOffset").value = openings.frontDoorOffset.toFixed(2);
+  $("#frontWindowWidth").value = openings.frontWindowWidth.toFixed(2);
+  $("#frontWindowOffset").value = openings.frontWindowOffset.toFixed(2);
+  $("#rearDoorEnabled").checked = openings.rearDoorEnabled;
+  $("#rearDoorWidth").value = openings.rearDoorWidth.toFixed(2);
+  $("#rearDoorOffset").value = openings.rearDoorOffset.toFixed(2);
+
+  $("#frontDoorWidth").max = Math.min(1.8, depth - 0.4).toFixed(2);
+  $("#frontDoorOffset").min = (openings.frontDoorWidth / 2 + 0.12).toFixed(2);
+  $("#frontDoorOffset").max = (depth - openings.frontDoorWidth / 2 - 0.12).toFixed(2);
+  $("#frontWindowWidth").max = Math.max(0.5, openings.frontDoorOffset - openings.frontDoorWidth / 2 - 0.22).toFixed(2);
+  $("#frontWindowOffset").min = (0.1 + openings.frontWindowWidth / 2).toFixed(2);
+  $("#frontWindowOffset").max = Math.max(
+    0.1 + openings.frontWindowWidth / 2,
+    openings.frontDoorOffset - openings.frontDoorWidth / 2 - 0.12 - openings.frontWindowWidth / 2,
+  ).toFixed(2);
+  $("#rearDoorWidth").max = (width - 0.3).toFixed(2);
+  $("#rearDoorOffset").min = (openings.rearDoorWidth / 2 + 0.15).toFixed(2);
+  $("#rearDoorOffset").max = (width - openings.rearDoorWidth / 2 - 0.15).toFixed(2);
+  for (const id of ["rearDoorWidth", "rearDoorOffset"]) $(`#${id}`).disabled = !openings.rearDoorEnabled;
+  syncStatus();
+}
+
+function applyRoomSettings(settings) {
+  state.room = normalizeRoomSettings(settings);
+  editor.room = rebuildStore(editor.scene, editor.room, state.colors, state.room);
+  editor.room.ceiling.visible = state.ceilingVisible;
+  editor.room.ceilingDetails.visible = state.ceilingVisible;
+  setWallsVisible(state.wallsVisible);
+  state.objects.forEach(constrainFurniture);
+  syncRoomInputs();
+  clearCollisionReport();
+  setView(state.view);
+  scheduleSave();
 }
 
 function updateSelectedPosition(axis, value) {
@@ -275,11 +322,23 @@ function applyEmptyRoom({ persist = true, notify = false } = {}) {
   if (!editor) return;
   state.objects.forEach(object => { editor.scene.remove(object); disposeFurniture(object); });
   state.objects = [];
+  state.room = normalizeRoomSettings(DEFAULT_ROOM_SETTINGS);
+  state.colors = { wall: "#ded0ba", floor: "#e0ded6", ceiling: "#e7dcc8" };
+  state.wallsVisible = true;
+  state.ceilingVisible = false;
+  editor.room = rebuildStore(editor.scene, editor.room, state.colors, state.room);
+  editor.room.ceiling.visible = false;
+  editor.room.ceilingDetails.visible = false;
+  setWallsVisible(true);
+  $("#wallColor").value = state.colors.wall;
+  $("#floorColor").value = state.colors.floor;
+  $("#ceilingColor").value = state.colors.ceiling;
   state.preset = "empty";
   setSelected(null);
   document.querySelectorAll(".preset-card").forEach(card => card.classList.remove("selected"));
   clearCollisionReport();
-  syncStatus();
+  syncRoomInputs();
+  setView("3d");
   if (persist) scheduleSave();
   if (notify) toast("Bo‘sh magazin xonasi tayyor");
 }
@@ -287,6 +346,11 @@ function applyEmptyRoom({ persist = true, notify = false } = {}) {
 function applyProject(project) {
   state.objects.forEach(object => { editor.scene.remove(object); disposeFurniture(object); });
   state.objects = [];
+  state.room = normalizeRoomSettings(project.room || DEFAULT_ROOM_SETTINGS);
+  editor.room = rebuildStore(editor.scene, editor.room, project.colors, state.room);
+  editor.room.ceiling.visible = state.ceilingVisible;
+  editor.room.ceilingDetails.visible = state.ceilingVisible;
+  setWallsVisible(state.wallsVisible);
   project.objects.forEach(object => {
     editor.scene.add(object);
     state.objects.push(object);
@@ -299,9 +363,8 @@ function applyProject(project) {
   $("#wallColor").value = state.colors.wall;
   $("#floorColor").value = state.colors.floor;
   $("#ceilingColor").value = state.colors.ceiling;
-  setRoomColor(editor.room, "wall", state.colors.wall);
-  setRoomColor(editor.room, "floor", state.colors.floor);
-  setRoomColor(editor.room, "ceiling", state.colors.ceiling);
+  syncRoomInputs();
+  setView(state.view);
   document.querySelectorAll(".preset-card").forEach(card => card.classList.toggle("selected", card.dataset.preset === state.preset));
   setSelected(null);
   syncStatus();
@@ -350,20 +413,21 @@ function setView(view) {
   } else if (view === "inside") {
     target.set(0, 1.55, 0.5);
     editor.camera.up.set(0, 1, 0);
-    editor.camera.position.set(0, 1.55, 3.05);
+    editor.camera.position.set(0, 1.55, Math.max(0.5, ROOM.depth / 2 - 0.3));
     controls.orbit.enabled = true;
     controls.setTransformEnabled(true);
     controls.orbit.minDistance = 0.5;
-    controls.orbit.maxDistance = 8;
+    controls.orbit.maxDistance = Math.max(8, Math.max(ROOM.depth, ROOM.width) * 1.2);
     controls.orbit.maxPolarAngle = Math.PI * 0.82;
   } else {
     target.set(0, 1, 0);
     editor.camera.up.set(0, 1, 0);
-    editor.camera.position.set(8.6, 6, 4.2);
+    const scale = Math.max(1, ROOM.depth / 7, ROOM.width / 4);
+    editor.camera.position.set(8.6 * scale, 6 * scale, 4.2 * scale);
     controls.orbit.enabled = true;
     controls.setTransformEnabled(true);
     controls.orbit.minDistance = 4;
-    controls.orbit.maxDistance = 22;
+    controls.orbit.maxDistance = Math.max(22, Math.max(ROOM.depth, ROOM.width) * 3);
     controls.orbit.maxPolarAngle = Math.PI * 0.49;
   }
   editor.camera.lookAt(target);
@@ -501,6 +565,33 @@ for (const part of ["wall", "floor", "ceiling"]) {
     scheduleSave();
   });
 }
+const roomInputIds = [
+  "roomLength", "roomWidth", "roomHeight", "frontDoorWidth", "frontDoorOffset",
+  "frontWindowWidth", "frontWindowOffset", "rearDoorWidth", "rearDoorOffset",
+];
+const updateRoomFromInputs = () => {
+  try {
+    applyRoomSettings({
+      ...state.room,
+      width: Number($("#roomWidth").value),
+      depth: Number($("#roomLength").value),
+      height: Number($("#roomHeight").value),
+      frontDoorWidth: Number($("#frontDoorWidth").value),
+      frontDoorOffset: Number($("#frontDoorOffset").value),
+      frontWindowWidth: Number($("#frontWindowWidth").value),
+      frontWindowOffset: Number($("#frontWindowOffset").value),
+      rearDoorEnabled: $("#rearDoorEnabled").checked,
+      rearDoorWidth: Number($("#rearDoorWidth").value),
+      rearDoorOffset: Number($("#rearDoorOffset").value),
+    });
+  } catch (error) {
+    console.error("Xona geometriyasi o‘zgartirilmadi:", error);
+    toast(error.message || "Xona sozlamalarini o‘zgartirib bo‘lmadi");
+    syncRoomInputs();
+  }
+};
+roomInputIds.forEach(id => $(`#${id}`).addEventListener("change", updateRoomFromInputs));
+$("#rearDoorEnabled").addEventListener("change", updateRoomFromInputs);
 $("#catalogSearch").addEventListener("input", event => {
   const query = event.target.value.toLocaleLowerCase("uz");
   document.querySelectorAll(".catalog-card").forEach(card => {

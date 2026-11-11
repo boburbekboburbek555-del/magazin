@@ -24,6 +24,8 @@ Three.js importlari CDN’dan olinadi, shuning uchun dastlabki ishga tushirishda
 - `Tekshirish` jihozlar to‘qnashuvini ko‘rsatadi. Xona devori, pol va shift ranglari o‘ng panelda sozlanadi.
 - O‘zgarishlar avtomatik saqlanadi. `Saqlash` JSON faylni eksport qiladi; `Yuklash` JSON loyihani import qiladi. `Rasm` 3D sahnani PNG qilib saqlaydi.
 - `Shift` va `Devorlar` tugmalari mos ravishda shiftni hamda devorlarni yashiradi/ko‘rsatadi.
+- O‘ng paneldagi **Xona shaklini tahrirlash** bo‘limidan xona uzunligi, eni, balandligi, old eshik va oyna o‘lchami/joyi hamda orqa eshikni tahrirlang. Eshik joyi orqa devordan, orqa eshik joyi esa chap chetdan metrda o‘lchanadi. O‘zgarishlar avtomatik saqlanadi va JSON loyihaga ham qo‘shiladi.
+- Xona o‘lchamlari uchun ruxsat etilgan oraliq: eni 2–12 m, uzunligi 3–20 m, balandligi 2,2–6 m. Oyna va eshiklar devor chegarasidan tashqariga chiqmasligi uchun qiymatlar moslanadi.
 
 ## Fayllar
 

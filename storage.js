@@ -1,17 +1,17 @@
 import { FURNITURE_TYPES, restoreFurniture, serializeFurniture } from "./furniture.js";
-import { ROOM } from "./store.js";
+import { ROOM, ROOM_SETTINGS, normalizeRoomSettings } from "./store.js";
 
 const STORAGE_KEY = "magazin3d-design-project-v1";
 const allowedTypes = new Set(FURNITURE_TYPES.map(item => item.type));
 const validColor = value => typeof value === "string" && /^#[\da-f]{6}$/i.test(value);
 
-export function createProject({ objects, colors, title, preset }) {
+export function createProject({ objects, colors, title, preset, room }) {
   return {
     format: "magazin3d-design",
     version: 1,
     title,
     preset,
-    room: { width: ROOM.width, depth: ROOM.depth, length: ROOM.length, height: ROOM.height },
+    room: room ? normalizeRoomSettings(room) : { ...ROOM, ...ROOM_SETTINGS },
     colors: { ...colors },
     objects: objects.map(serializeFurniture),
     updatedAt: new Date().toISOString(),
@@ -53,6 +53,9 @@ export function validateProject(project) {
     return item;
   });
   const legacyOrientation = project.room?.width === 7 && project.room?.depth === 4;
+  const room = normalizeRoomSettings(legacyOrientation
+    ? { ...project.room, width: 4, depth: 7, length: 7 }
+    : project.room);
   return {
     format: "magazin3d-design",
     version: 1,
@@ -63,6 +66,7 @@ export function validateProject(project) {
       floor: colors.floor || "#e0ded6",
       ceiling: colors.ceiling || "#e7dcc8",
     },
+    room,
     objects: objects.map(item => restoreFurniture(legacyOrientation ? {
       ...item,
       position: item.position ? [item.position[2], item.position[1], -item.position[0]] : item.position,

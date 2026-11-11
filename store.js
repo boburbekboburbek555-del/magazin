@@ -1,8 +1,103 @@
 import * as THREE from "three";
 
-export const ROOM = Object.freeze({ width: 4, depth: 7, length: 7, height: 2.8, wallThickness: 0.12 });
+export let ROOM = Object.freeze({ width: 4, depth: 7, length: 7, height: 2.8, wallThickness: 0.12 });
+export const DEFAULT_ROOM_SETTINGS = Object.freeze({
+  width: 4,
+  depth: 7,
+  length: 7,
+  height: 2.8,
+  frontDoorWidth: 0.94,
+  frontDoorOffset: 5.88,
+  frontWindowWidth: 5.19,
+  frontWindowOffset: 2.695,
+  rearDoorEnabled: true,
+  rearDoorWidth: 0.92,
+  rearDoorOffset: 1.88,
+});
+export let ROOM_SETTINGS = Object.freeze({
+  frontDoorWidth: 0.94,
+  frontDoorOffset: 5.88,
+  frontWindowWidth: 5.19,
+  frontWindowOffset: 2.695,
+  rearDoorEnabled: true,
+  rearDoorWidth: 0.92,
+  rearDoorOffset: 1.88,
+});
 const wallMeshes = [];
 const wallColorMaterials = [];
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+export function normalizeRoomSettings(settings = {}) {
+  const width = Number(settings.width ?? ROOM.width);
+  const depth = Number(settings.depth ?? settings.length ?? ROOM.depth);
+  const height = Number(settings.height ?? ROOM.height);
+  if (!Number.isFinite(width) || width < 2 || width > 12 ||
+      !Number.isFinite(depth) || depth < 3 || depth > 20 ||
+      !Number.isFinite(height) || height < 2.2 || height > 6) {
+    throw new Error("Xona o‘lchamlari: eni 2–12 m, uzunligi 3–20 m, balandligi 2,2–6 m bo‘lishi kerak.");
+  }
+  for (const key of ["frontDoorWidth", "frontDoorOffset", "frontWindowWidth", "frontWindowOffset", "rearDoorWidth", "rearDoorOffset"]) {
+    if (settings[key] !== undefined && !Number.isFinite(Number(settings[key]))) {
+      throw new Error("Eshik va oyna o‘lchamlari son bilan kiritilishi kerak.");
+    }
+  }
+
+  const frontDoorWidth = clamp(Number(settings.frontDoorWidth ?? ROOM_SETTINGS.frontDoorWidth), 0.7, Math.min(1.8, depth - 0.4));
+  const frontDoorOffset = clamp(
+    Number(settings.frontDoorOffset ?? depth - 1.12),
+    frontDoorWidth / 2 + 0.12,
+    depth - frontDoorWidth / 2 - 0.12,
+  );
+  const availableWindowWidth = frontDoorOffset - frontDoorWidth / 2 - 0.22;
+  const frontWindowWidth = clamp(
+    Number(settings.frontWindowWidth ?? Math.min(5.19, availableWindowWidth)),
+    0.5,
+    Math.max(0.5, availableWindowWidth),
+  );
+  const frontWindowOffset = clamp(
+    Number(settings.frontWindowOffset ?? (0.1 + frontWindowWidth / 2 + frontDoorOffset - frontDoorWidth / 2 - 0.12 - frontWindowWidth / 2) / 2),
+    0.1 + frontWindowWidth / 2,
+    Math.max(0.1 + frontWindowWidth / 2, frontDoorOffset - frontDoorWidth / 2 - 0.12 - frontWindowWidth / 2),
+  );
+  const rearDoorWidth = clamp(Number(settings.rearDoorWidth ?? ROOM_SETTINGS.rearDoorWidth), 0.6, width - 0.3);
+  const rearDoorOffset = clamp(Number(settings.rearDoorOffset ?? width / 2), rearDoorWidth / 2 + 0.15, width - rearDoorWidth / 2 - 0.15);
+
+  return {
+    width,
+    depth,
+    length: depth,
+    height,
+    frontDoorWidth,
+    frontDoorOffset,
+    frontWindowWidth,
+    frontWindowOffset,
+    rearDoorEnabled: settings.rearDoorEnabled !== false,
+    rearDoorWidth,
+    rearDoorOffset,
+  };
+}
+
+export function setRoomSettings(settings) {
+  const normalized = normalizeRoomSettings(settings);
+  ROOM = Object.freeze({
+    width: normalized.width,
+    depth: normalized.depth,
+    length: normalized.depth,
+    height: normalized.height,
+    wallThickness: ROOM.wallThickness,
+  });
+  ROOM_SETTINGS = Object.freeze({
+    frontDoorWidth: normalized.frontDoorWidth,
+    frontDoorOffset: normalized.frontDoorOffset,
+    frontWindowWidth: normalized.frontWindowWidth,
+    frontWindowOffset: normalized.frontWindowOffset,
+    rearDoorEnabled: normalized.rearDoorEnabled,
+    rearDoorWidth: normalized.rearDoorWidth,
+    rearDoorOffset: normalized.rearDoorOffset,
+  });
+  return { ...ROOM, ...ROOM_SETTINGS };
+}
 
 function wall(scene, width, height, depth, x, y, z, color, rotationY = 0) {
   const material = new THREE.MeshStandardMaterial({ color, roughness: 0.86, transparent: true, opacity: 0.42, side: THREE.DoubleSide });
@@ -20,14 +115,15 @@ function wall(scene, width, height, depth, x, y, z, color, rotationY = 0) {
 
 function addLongFacade(scene, wallColor, sideX) {
   const { width: w, depth: d, height: h, wallThickness: t } = ROOM;
-  const glassHeight = 2.28;
+  const { frontDoorWidth: doorWidth, frontDoorOffset, frontWindowWidth, frontWindowOffset } = ROOM_SETTINGS;
+  const doorHeight = Math.min(2.3, h - 0.4);
+  const glassHeight = doorHeight - 0.02;
   const glassCenterY = glassHeight / 2 + 0.08;
-  const doorWidth = 0.94;
-  const doorCenterZ = d / 2 - 1.12;
+  const doorCenterZ = -d / 2 + frontDoorOffset;
   const doorStart = doorCenterZ - doorWidth / 2;
-  const windowStart = -d / 2 + 0.1;
-  const windowEnd = doorStart - 0.12;
-  const windowLength = windowEnd - windowStart;
+  const windowStart = -d / 2 + frontWindowOffset - frontWindowWidth / 2;
+  const windowEnd = windowStart + frontWindowWidth;
+  const windowLength = frontWindowWidth;
   const wallColorMaterial = new THREE.MeshStandardMaterial({ color: wallColor, roughness: 0.86 });
   const frameMaterial = new THREE.MeshStandardMaterial({ color: "#756a58", roughness: 0.48, metalness: 0.12 });
   wallColorMaterials.push(wallColorMaterial);
@@ -48,9 +144,9 @@ function addLongFacade(scene, wallColor, sideX) {
   const pane = (length, centerZ) => frame(0.025, glassHeight, length, faceX, glassCenterY, centerZ, glassMaterial);
   const sill = (length, centerZ) => frame(t, 0.12, length, sideX, 0.06, centerZ, wallColorMaterial);
 
-  wall(scene, t, h - 2.42, d, sideX, (h + 2.42) / 2, 0, wallColor);
-  wall(scene, t, 2.46, 0.18, sideX, 1.23, -d / 2 + 0.09, wallColor);
-  wall(scene, t, 2.46, 0.18, sideX, 1.23, d / 2 - 0.09, wallColor);
+  wall(scene, t, h - doorHeight - 0.12, d, sideX, (h + doorHeight + 0.12) / 2, 0, wallColor);
+  wall(scene, t, doorHeight + 0.16, 0.18, sideX, (doorHeight + 0.16) / 2, -d / 2 + 0.09, wallColor);
+  wall(scene, t, doorHeight + 0.16, 0.18, sideX, (doorHeight + 0.16) / 2, d / 2 - 0.09, wallColor);
   sill(windowLength + 0.12, (windowStart + windowEnd) / 2);
   sill(doorWidth + 0.12, doorCenterZ);
   const endWindowStart = doorCenterZ + doorWidth / 2 + 0.12;
@@ -78,25 +174,25 @@ function addLongFacade(scene, wallColor, sideX) {
   const door = new THREE.Group();
   door.userData.roomPart = "wall";
   for (const z of [doorCenterZ - doorWidth / 2, doorCenterZ + doorWidth / 2]) {
-    const jamb = new THREE.Mesh(new THREE.BoxGeometry(0.055, 2.3, 0.055), frameMaterial);
-    jamb.position.set(faceX, 1.23, z);
+    const jamb = new THREE.Mesh(new THREE.BoxGeometry(0.055, doorHeight, 0.055), frameMaterial);
+    jamb.position.set(faceX, doorHeight / 2 + 0.06, z);
     door.add(jamb);
   }
   const lintel = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.055, doorWidth + 0.055), frameMaterial);
-  lintel.position.set(faceX, 2.38, doorCenterZ);
+  lintel.position.set(faceX, doorHeight + 0.12, doorCenterZ);
   door.add(lintel);
   const panel = new THREE.Mesh(
-    new THREE.PlaneGeometry(doorWidth - 0.09, 2.18),
+    new THREE.PlaneGeometry(doorWidth - 0.09, doorHeight - 0.12),
     new THREE.MeshPhysicalMaterial({
       color: "#b9d1c3", transparent: true, opacity: 0.19,
       roughness: 0.12, metalness: 0.1, side: THREE.DoubleSide,
     })
   );
   panel.rotation.y = Math.PI / 2;
-  panel.position.set(faceX - 0.035, 1.17, doorCenterZ);
+  panel.position.set(faceX - 0.035, doorHeight / 2 + 0.06, doorCenterZ);
   door.add(panel);
   const handle = new THREE.Mesh(new THREE.SphereGeometry(0.025, 12, 8), frameMaterial);
-  handle.position.set(faceX - 0.085, 1.12, doorCenterZ - doorWidth * 0.28);
+  handle.position.set(faceX - 0.085, Math.min(1.12, doorHeight / 2), doorCenterZ - doorWidth * 0.28);
   door.add(handle);
   door.userData.roomPart = "wall";
   scene.add(door);
@@ -109,9 +205,9 @@ function addRearDoor(scene, wallColor, backZ) {
   const rearDoorGroup = new THREE.Group();
   rearDoorGroup.userData.roomPart = "wall";
   const { width: w, height: h, wallThickness: t } = ROOM;
-  const doorWidth = 0.92;
-  const doorHeight = 2.08;
-  const doorCenterX = -0.12;
+  const { rearDoorWidth: doorWidth, rearDoorOffset } = ROOM_SETTINGS;
+  const doorHeight = Math.min(2.08, h - 0.4);
+  const doorCenterX = -w / 2 + rearDoorOffset;
   const leftWidth = doorCenterX - doorWidth / 2 + w / 2;
   const rightWidth = w / 2 - (doorCenterX + doorWidth / 2);
   wall(scene, leftWidth, h, t, -w / 2 + leftWidth / 2, h / 2, backZ, wallColor);
@@ -207,9 +303,11 @@ function addCeilingDetails(scene) {
   return group;
 }
 
-export function createStore(scene, colors = {}) {
+export function createStore(scene, colors = {}, settings = {}) {
+  setRoomSettings(settings);
   wallMeshes.length = 0;
   wallColorMaterials.length = 0;
+  const root = new THREE.Group();
   const floorColor = colors.floor || "#e0ded6";
   const wallColor = colors.wall || "#ded0ba";
   const ceilingColor = colors.ceiling || "#e7dcc8";
@@ -221,7 +319,7 @@ export function createStore(scene, colors = {}) {
   floor.position.y = -0.06;
   floor.receiveShadow = true;
   floor.userData.roomPart = "floor";
-  scene.add(floor);
+  root.add(floor);
 
   const gridPositions = [];
   const spacing = 0.25;
@@ -239,7 +337,7 @@ export function createStore(scene, colors = {}) {
   gridGeometry.setAttribute("position", new THREE.Float32BufferAttribute(gridPositions, 3));
   const grid = new THREE.LineSegments(gridGeometry, new THREE.LineBasicMaterial({ color: "#849182", transparent: true, opacity: 0.18 }));
   grid.userData.roomPart = "grid";
-  scene.add(grid);
+  root.add(grid);
 
   const { width: w, depth: d, height: h, wallThickness: t } = ROOM;
   const backZ = -d / 2;
@@ -248,16 +346,30 @@ export function createStore(scene, colors = {}) {
   const ceiling = new THREE.Mesh(new THREE.BoxGeometry(w, 0.08, d), sideMaterial);
   ceiling.position.y = h + 0.04;
   ceiling.userData.roomPart = "ceiling";
-  scene.add(ceiling);
-  const ceilingDetails = addCeilingDetails(scene);
+  root.add(ceiling);
+  const ceilingDetails = addCeilingDetails(root);
 
-  addRearDoor(scene, wallColor, backZ);
-  wall(scene, w + t, h, t, 0, h / 2, frontZ, wallColor);
-  wall(scene, t, h, d + t, -w / 2, h / 2, 0, wallColor);
-  const doorGroup = addLongFacade(scene, wallColor, w / 2);
+  if (ROOM_SETTINGS.rearDoorEnabled) addRearDoor(root, wallColor, backZ);
+  else wall(root, w + t, h, t, 0, h / 2, backZ, wallColor);
+  wall(root, w + t, h, t, 0, h / 2, frontZ, wallColor);
+  wall(root, t, h, d + t, -w / 2, h / 2, 0, wallColor);
+  const doorGroup = addLongFacade(root, wallColor, w / 2);
 
-  addRoomLights(scene);
-  return { floor, grid, ceiling, ceilingDetails, doorGroup };
+  addRoomLights(root);
+  scene.add(root);
+  return { root, floor, grid, ceiling, ceilingDetails, doorGroup };
+}
+
+export function rebuildStore(scene, previousRoom, colors = {}, settings = {}) {
+  if (previousRoom?.root) {
+    previousRoom.root.traverse(object => {
+      object.geometry?.dispose();
+      if (Array.isArray(object.material)) object.material.forEach(material => material.dispose());
+      else object.material?.dispose();
+    });
+    scene.remove(previousRoom.root);
+  }
+  return createStore(scene, colors, settings);
 }
 
 function addRoomLights(scene) {

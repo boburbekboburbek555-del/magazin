@@ -112,7 +112,30 @@
           </div>
           <div class="room-settings">
             <div class="room-heading"><div><span class="eyebrow">XONA</span><h3>O‘lcham va ranglar</h3></div><span class="room-icon">▱</span></div>
-            <div class="room-stats"><div><strong>28</strong><small>m² maydon</small></div><div><strong>78.4</strong><small>m³ hajm</small></div><div><strong>7 × 4</strong><small>metr</small></div></div>
+            <div class="room-stats"><div><strong id="roomArea">28</strong><small>m² maydon</small></div><div><strong id="roomVolume">78.4</strong><small>m³ hajm</small></div><div><strong id="roomSize">7 × 4</strong><small>metr</small></div></div>
+            <details class="room-geometry">
+              <summary>Xona shaklini tahrirlash</summary>
+              <div class="geometry-fields">
+                <div class="geometry-group">
+                  <strong>Xona o‘lchami</strong>
+                  <label><span>Uzunligi</span><div><input id="roomLength" type="number" min="3" max="20" step="0.1"><small>m</small></div></label>
+                  <label><span>Eni</span><div><input id="roomWidth" type="number" min="2" max="12" step="0.1"><small>m</small></div></label>
+                  <label><span>Balandligi</span><div><input id="roomHeight" type="number" min="2.2" max="6" step="0.1"><small>m</small></div></label>
+                </div>
+                <div class="geometry-group">
+                  <strong>Old eshik va oyna</strong>
+                  <label><span>Eshik eni</span><div><input id="frontDoorWidth" type="number" min="0.7" step="0.05"><small>m</small></div></label>
+                  <label><span>Eshik joyi · orqadan</span><div><input id="frontDoorOffset" type="number" min="0.5" step="0.05"><small>m</small></div></label>
+                  <label><span>Oyna eni</span><div><input id="frontWindowWidth" type="number" min="0.5" step="0.05"><small>m</small></div></label>
+                  <label><span>Oyna joyi · orqadan</span><div><input id="frontWindowOffset" type="number" min="0.5" step="0.05"><small>m</small></div></label>
+                </div>
+                <div class="geometry-group">
+                  <label class="geometry-check"><input id="rearDoorEnabled" type="checkbox"><span>Orqa eshikni ko‘rsatish</span></label>
+                  <label><span>Orqa eshik eni</span><div><input id="rearDoorWidth" type="number" min="0.6" step="0.05"><small>m</small></div></label>
+                  <label><span>Joylashuvi · chapdan</span><div><input id="rearDoorOffset" type="number" min="0.5" step="0.05"><small>m</small></div></label>
+                </div>
+              </div>
+            </details>
             <div class="room-color-list"><label><span><i class="swatch wall-swatch"></i>Devor rangi</span><input id="wallColor" type="color" value="#ded0ba"></label><label><span><i class="swatch floor-swatch"></i>Pol rangi</span><input id="floorColor" type="color" value="#e0ded6"></label><label><span><i class="swatch ceiling-swatch"></i>Shift rangi</span><input id="ceilingColor" type="color" value="#e7dcc8"></label></div>
           </div>
           <div class="properties-footer"><span class="status-pulse"></span><span>O‘zgarishlar avtomatik saqlanadi</span><span id="lastSaved">Tayyor</span></div>
